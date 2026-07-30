@@ -4,7 +4,9 @@ import InputSection from './components/InputSection';
 import TranscriptView from './components/TranscriptView';
 import RewriteStudio from './components/RewriteStudio';
 import ScriptComparison from './components/ScriptComparison';
-import { CheckCircle, AlertCircle, Zap } from 'lucide-react';
+import CompetitorAnalyzer from './components/CompetitorAnalyzer';
+import Veo3Studio from './components/Veo3Studio';
+import { CheckCircle, AlertCircle, Eye, Sparkles, Wand2 } from 'lucide-react';
 import './App.css';
 
 const API_BASE = 'http://localhost:5000/api';
@@ -25,6 +27,11 @@ export default function App() {
   const [originalTranscript, setOriginalTranscript] = useState('');
   const [rewrittenScript, setRewrittenScript] = useState('');
 
+  // NEW: Competitor Visual Analysis & Veo3 Prompts State
+  const [competitorAnalysis, setCompetitorAnalysis] = useState(null);
+  const [veo3Data, setVeo3Data] = useState(null);
+  const [isGeneratingVeo3, setIsGeneratingVeo3] = useState(false);
+
   // Load API Keys and Provider from localStorage on startup
   useEffect(() => {
     const savedGeminiKey = localStorage.getItem('GEMINI_API_KEY');
@@ -44,13 +51,13 @@ export default function App() {
   const handleProcessUrl = async (url) => {
     const activeKey = getActiveApiKey();
     if (!activeKey) {
-      setErrorMessage(`Vui lòng nhập ${provider === 'groq' ? 'Groq' : 'Gemini'} API Key trước khi bắt đầu! Click vào nút 'API Key' ở góc trên bên phải màn hình.`);
+      setErrorMessage(`Vui lòng nhập ${provider === 'groq' ? 'Groq' : 'Gemini'} API Key trước khi bắt đầu!`);
       return;
     }
 
     setIsLoading(true);
     setErrorMessage('');
-    setLoadingStatus('1/2. Đang kết nối và trích xuất audio từ URL video...');
+    setLoadingStatus('1/3. Đang kết nối và trích xuất audio từ URL video đối thủ...');
 
     try {
       const extractRes = await fetch(`${API_BASE}/extract-url`, {
@@ -66,7 +73,7 @@ export default function App() {
 
       setExtractedFilePath(extractData.filePath);
       
-      setLoadingStatus(`2/2. ${provider === 'groq' ? 'Groq Whisper' : 'Gemini AI'} đang chép lời tiếng Việt...`);
+      setLoadingStatus(`2/3. ${provider === 'groq' ? 'Groq Whisper' : 'Gemini AI'} đang chép lời thoại...`);
       const transcribeRes = await fetch(`${API_BASE}/transcribe`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -83,6 +90,23 @@ export default function App() {
       }
 
       setOriginalTranscript(transcribeData.transcript);
+
+      // 3. Automatically analyze competitor visual format and motion style
+      setLoadingStatus('3/3. AI đang phân tích Định dạng Visual, Loại chuyển động & Tông màu video đối thủ...');
+      const analyzeRes = await fetch(`${API_BASE}/analyze-competitor`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          transcript: transcribeData.transcript,
+          apiKey: activeKey,
+          provider: provider
+        })
+      });
+      const analyzeData = await analyzeRes.json();
+      if (analyzeRes.ok && analyzeData.analysis) {
+        setCompetitorAnalysis(analyzeData.analysis);
+      }
+
       setCurrentStep(2);
     } catch (err) {
       setErrorMessage(err.message);
@@ -101,7 +125,7 @@ export default function App() {
 
     setIsLoading(true);
     setErrorMessage('');
-    setLoadingStatus('1/2. Đang tải file video/audio lên máy chủ...');
+    setLoadingStatus('1/3. Đang tải file video đối thủ lên...');
 
     try {
       const formData = new FormData();
@@ -119,7 +143,7 @@ export default function App() {
 
       setExtractedFilePath(uploadData.filePath);
 
-      setLoadingStatus(`2/2. ${provider === 'groq' ? 'Groq Whisper' : 'Gemini AI'} đang chép lời tiếng Việt...`);
+      setLoadingStatus(`2/3. ${provider === 'groq' ? 'Groq Whisper' : 'Gemini AI'} đang chép lời thoại...`);
       const transcribeRes = await fetch(`${API_BASE}/transcribe`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -136,6 +160,23 @@ export default function App() {
       }
 
       setOriginalTranscript(transcribeData.transcript);
+
+      // 3. Analyze competitor
+      setLoadingStatus('3/3. AI đang phân tích Định dạng Visual, Loại chuyển động & Tông màu video đối thủ...');
+      const analyzeRes = await fetch(`${API_BASE}/analyze-competitor`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          transcript: transcribeData.transcript,
+          apiKey: activeKey,
+          provider: provider
+        })
+      });
+      const analyzeData = await analyzeRes.json();
+      if (analyzeRes.ok && analyzeData.analysis) {
+        setCompetitorAnalysis(analyzeData.analysis);
+      }
+
       setCurrentStep(2);
     } catch (err) {
       setErrorMessage(err.message);
@@ -154,7 +195,7 @@ export default function App() {
 
     setIsLoading(true);
     setErrorMessage('');
-    setLoadingStatus(`${provider === 'groq' ? 'Groq Llama 3.3' : 'Gemini AI'} đang sáng tạo & xào nấu kịch bản mới...`);
+    setLoadingStatus('AI đang sáng tạo kịch bản mới & cấu trúc kênh...');
 
     try {
       const res = await fetch(`${API_BASE}/rewrite`, {
@@ -185,6 +226,43 @@ export default function App() {
     }
   };
 
+  // NEW: Generate Veo3 Prompts Step
+  const handleGenerateVeo3Prompts = async () => {
+    const activeKey = getActiveApiKey();
+    if (!activeKey) {
+      setErrorMessage('Vui lòng nhập API Key!');
+      return;
+    }
+
+    setIsGeneratingVeo3(true);
+    setErrorMessage('');
+
+    try {
+      const res = await fetch(`${API_BASE}/generate-veo3-prompts`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          analysisData: competitorAnalysis || {},
+          newScriptText: rewrittenScript || originalTranscript,
+          apiKey: activeKey,
+          provider: provider
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.veo3Data) {
+        throw new Error(data.error || 'Không thể tạo bộ prompt Veo3.');
+      }
+
+      setVeo3Data(data.veo3Data);
+      setCurrentStep(5);
+    } catch (err) {
+      setErrorMessage(err.message);
+    } finally {
+      setIsGeneratingVeo3(false);
+    }
+  };
+
   return (
     <div className="app-container">
       <Header 
@@ -197,13 +275,13 @@ export default function App() {
       />
 
       {/* Navigation Progress Steps */}
-      <nav className="steps-nav">
+      <nav className="steps-nav" style={{ flexWrap: 'wrap' }}>
         <div 
           className={`step-item ${currentStep === 1 ? 'active' : currentStep > 1 ? 'completed' : ''}`}
           onClick={() => setCurrentStep(1)}
         >
           <div className="step-num">{currentStep > 1 ? <CheckCircle size={16} /> : '1'}</div>
-          <div className="step-title">1. Nhập Link / File Video</div>
+          <div className="step-title">1. Link / File Đối Thủ</div>
         </div>
 
         <div 
@@ -223,34 +301,21 @@ export default function App() {
         </div>
 
         <div 
-          className={`step-item ${currentStep === 4 ? 'active' : ''}`}
+          className={`step-item ${currentStep === 4 ? 'active' : currentStep > 4 ? 'completed' : ''}`}
           onClick={() => rewrittenScript && setCurrentStep(4)}
         >
-          <div className="step-num">4</div>
-          <div className="step-title">4. Kịch Bản Mới & Export</div>
+          <div className="step-num">{currentStep > 4 ? <CheckCircle size={16} /> : '4'}</div>
+          <div className="step-title">4. Phân Tích Visual Đối Thủ</div>
+        </div>
+
+        <div 
+          className={`step-item ${currentStep === 5 ? 'active' : ''}`}
+          onClick={() => veo3Data && setCurrentStep(5)}
+        >
+          <div className="step-num">5</div>
+          <div className="step-title">5. Bộ Prompt Veo3 / Sora</div>
         </div>
       </nav>
-
-      {/* Provider Recommendation Banner */}
-      {provider === 'groq' && !groqApiKey && (
-        <div style={{ background: 'rgba(6, 182, 212, 0.12)', border: '1px solid rgba(6, 182, 212, 0.35)', color: '#06b6d4', padding: '14px 20px', borderRadius: 12, marginBottom: 24, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <Zap size={20} color="#06b6d4" />
-            <span style={{ fontSize: '0.88rem', color: '#e5e7eb' }}>
-              <strong>Khuyên dùng Groq AI Engine:</strong> Tốc độ cực nhanh (1 giây), chép lời tiếng Việt chuẩn xác và <strong>100% không bao giờ gặp lỗi 429 Quota Exceeded</strong>.
-            </span>
-          </div>
-          <a 
-            href="https://console.groq.com/keys" 
-            target="_blank" 
-            rel="noreferrer"
-            className="btn-secondary"
-            style={{ fontSize: '0.8rem', padding: '6px 14px', background: '#06b6d4', color: '#000', fontWeight: 700, border: 'none' }}
-          >
-            Lấy Groq API Key Miễn Phí (5s)
-          </a>
-        </div>
-      )}
 
       {/* Error Alert Display */}
       {errorMessage && (
@@ -298,11 +363,24 @@ export default function App() {
       )}
 
       {currentStep === 4 && (
-        <ScriptComparison 
-          originalTranscript={originalTranscript}
-          rewrittenScript={rewrittenScript}
-          onReGenerate={() => setCurrentStep(3)}
-        />
+        <div>
+          <ScriptComparison 
+            originalTranscript={originalTranscript}
+            rewrittenScript={rewrittenScript}
+            onReGenerate={() => setCurrentStep(3)}
+          />
+          <div style={{ marginTop: 24 }}>
+            <CompetitorAnalyzer 
+              analysis={competitorAnalysis}
+              onGenerateVeo3={handleGenerateVeo3Prompts}
+              isGeneratingVeo3={isGeneratingVeo3}
+            />
+          </div>
+        </div>
+      )}
+
+      {currentStep === 5 && (
+        <Veo3Studio veo3Data={veo3Data} />
       )}
     </div>
   );

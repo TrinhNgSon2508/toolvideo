@@ -10,6 +10,8 @@ import { downloadMediaFromUrl } from './services/downloader.js';
 import { transcribeAudioWithGemini } from './services/transcriber.js';
 import { rewriteScriptWithGemini } from './services/rewriter.js';
 import { transcribeAudioWithGroq, rewriteScriptWithGroq } from './services/groqService.js';
+import { analyzeCompetitorVideo } from './services/videoAnalyzer.js';
+import { generateVeo3ChannelPrompts } from './services/veo3PromptGen.js';
 
 dotenv.config();
 
@@ -65,7 +67,7 @@ app.post('/api/upload-file', upload.single('mediaFile'), (req, res) => {
   }
 });
 
-// Transcribe audio using selected provider (groq | gemini)
+// Transcribe audio
 app.post('/api/transcribe', async (req, res) => {
   try {
     const { filePath, apiKey, provider = 'groq' } = req.body;
@@ -74,69 +76,60 @@ app.post('/api/transcribe', async (req, res) => {
     }
 
     let transcriptText = '';
-
     if (provider === 'groq') {
-      console.log(`[API /transcribe] Using Groq Whisper Provider...`);
       transcriptText = await transcribeAudioWithGroq(filePath, apiKey);
     } else {
-      console.log(`[API /transcribe] Using Gemini Provider...`);
       transcriptText = await transcribeAudioWithGemini(filePath, apiKey);
     }
 
-    // Cleanup local temp audio file
     try { fs.unlinkSync(filePath); } catch (e) {}
-
     res.json({ success: true, transcript: transcriptText });
   } catch (error) {
-    console.error('[API /transcribe Error]:', error.message);
     res.status(500).json({ error: error.message });
   }
 });
 
-// Rewrite script using selected provider (groq | gemini)
+// Rewrite script
 app.post('/api/rewrite', async (req, res) => {
   try {
-    const {
-      originalTranscript,
-      style,
-      targetDuration,
-      targetAudience,
-      customPrompt,
-      apiKey,
-      provider = 'groq'
-    } = req.body;
-
-    if (!originalTranscript || originalTranscript.trim().length === 0) {
-      return res.status(400).json({ error: 'Nội dung lời thoại gốc không được để trống!' });
-    }
+    const { originalTranscript, style, targetDuration, targetAudience, customPrompt, apiKey, provider = 'groq' } = req.body;
+    if (!originalTranscript) return res.status(400).json({ error: 'Nội dung lời thoại gốc không được để trống!' });
 
     let rewrittenScript = '';
-
     if (provider === 'groq') {
-      console.log(`[API /rewrite] Using Groq Llama 3.3 Provider...`);
-      rewrittenScript = await rewriteScriptWithGroq({
-        originalTranscript,
-        style,
-        targetDuration,
-        targetAudience,
-        customPrompt,
-        apiKey
-      });
+      rewrittenScript = await rewriteScriptWithGroq({ originalTranscript, style, targetDuration, targetAudience, customPrompt, apiKey });
     } else {
-      console.log(`[API /rewrite] Using Gemini Provider...`);
-      rewrittenScript = await rewriteScriptWithGemini({
-        originalTranscript,
-        style,
-        targetDuration,
-        targetAudience,
-        customPrompt,
-        userApiKey: apiKey
-      });
+      rewrittenScript = await rewriteScriptWithGemini({ originalTranscript, style, targetDuration, targetAudience, customPrompt, userApiKey: apiKey });
     }
 
     res.json({ success: true, rewrittenScript });
   } catch (error) {
-    console.error('[API /rewrite Error]:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// NEW: Competitor Video Visual & Motion Analysis
+app.post('/api/analyze-competitor', async (req, res) => {
+  try {
+    const { transcript, apiKey, provider = 'groq' } = req.body;
+    if (!transcript) return res.status(400).json({ error: 'Chưa có dữ liệu nội dung video để phân tích!' });
+
+    const analysis = await analyzeCompetitorVideo({ transcript, apiKey, provider });
+    res.json({ success: true, analysis });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// NEW: Generate Veo3 Prompts & Channel Consistency Plan
+app.post('/api/generate-veo3-prompts', async (req, res) => {
+  try {
+    const { analysisData, newScriptText, apiKey, provider = 'groq' } = req.body;
+    if (!newScriptText) return res.status(400).json({ error: 'Kịch bản mới không được để trống!' });
+
+    const veo3Data = await generateVeo3ChannelPrompts({ analysisData: analysisData || {}, newScriptText, apiKey, provider });
+    res.json({ success: true, veo3Data });
+  } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
