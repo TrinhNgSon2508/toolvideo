@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, UploadCloud, Sparkles, FileAudio, AlertCircle, ExternalLink, HelpCircle } from 'lucide-react';
+import { Link, UploadCloud, Sparkles, FileAudio, AlertCircle, CheckCircle2, Zap } from 'lucide-react';
 
 export default function InputSection({ onProcessUrl, onProcessFile, isLoading, loadingStatus }) {
   const [url, setUrl] = useState('');
@@ -10,7 +10,7 @@ export default function InputSection({ onProcessUrl, onProcessFile, isLoading, l
   const handleUrlSubmit = (e) => {
     e.preventDefault();
     if (!url.trim()) {
-      setErrorMsg('Vui lòng nhập đường dẫn video (Facebook, YouTube, TikTok...)');
+      setErrorMsg('Vui lòng nhập đường dẫn video (YouTube, TikTok, Facebook...)');
       return;
     }
     setErrorMsg('');
@@ -31,7 +31,7 @@ export default function InputSection({ onProcessUrl, onProcessFile, isLoading, l
 
   const handleFileSubmit = () => {
     if (!selectedFile) {
-      setErrorMsg('Vui lòng chọn file video/audio từ máy tính!');
+      setErrorMsg('Vui lòng chọn file video/audio từ thiết bị!');
       return;
     }
     setErrorMsg('');
@@ -47,47 +47,34 @@ export default function InputSection({ onProcessUrl, onProcessFile, isLoading, l
     <div className="glass-panel input-card">
       <div className="section-head">
         <h2>Nhập Nguồn Video Của Bạn</h2>
-        <p>Hỗ trợ đường dẫn từ Facebook, YouTube, TikTok, Reels hoặc Tải trực tiếp file MP4/MP3 từ thiết bị</p>
+        <p>Hỗ trợ đường dẫn YouTube, TikTok, Facebook hoặc Tải trực tiếp file MP4/MP3 từ thiết bị (Khuyên dùng)</p>
       </div>
 
-      <div style={{ display: 'flex', gap: 12, marginBottom: 24 }}>
+      <div style={{ display: 'flex', gap: 12, marginBottom: 24, flexWrap: 'wrap' }}>
         <button
           className={`btn-secondary ${inputMode === 'url' ? 'btn-primary' : ''}`}
           onClick={() => { setInputMode('url'); setErrorMsg(''); }}
           style={{ borderRadius: 30 }}
         >
-          <Link size={16} /> Link Video (FB / YT / TikTok)
+          <Link size={16} /> Link Video (YT / TikTok / FB)
         </button>
         <button
           className={`btn-secondary ${inputMode === 'file' ? 'btn-primary' : ''}`}
           onClick={() => { setInputMode('file'); setErrorMsg(''); }}
           style={{ borderRadius: 30 }}
         >
-          <UploadCloud size={16} /> Tải File Trực Tiếp
+          <UploadCloud size={16} /> Tải File Trực Tiếp (Siêu Nhanh & 100% Thành Công)
         </button>
       </div>
 
       {errorMsg && (
         <div style={{ background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.4)', color: '#fca5a5', padding: '14px 18px', borderRadius: 12, marginBottom: 20 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, marginBottom: 4 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, marginBottom: 6 }}>
             <AlertCircle size={18} /> {errorMsg}
           </div>
-          {url.includes('facebook.com') && (
-            <div style={{ marginTop: 10, fontSize: '0.82rem', color: '#e5e7eb', background: 'rgba(0,0,0,0.3)', padding: 10, borderRadius: 8 }}>
-              💡 <strong>Mẹo với Video Facebook bị giới hạn riêng tư trên Web:</strong>
-              <div style={{ marginTop: 6, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-                <a 
-                  href={`https://snapsave.app/`} 
-                  target="_blank" 
-                  rel="noreferrer"
-                  style={{ color: '#06b6d4', textDecoration: 'underline', display: 'inline-flex', alignItems: 'center', gap: 4 }}
-                >
-                  Bóc tách nhanh file MP4 qua SnapSave <ExternalLink size={12} />
-                </a>
-                <span>rồi kéo thả vào tab <strong>Tải File Trực Tiếp</strong> nhé!</span>
-              </div>
-            </div>
-          )}
+          <div style={{ fontSize: '0.85rem', color: '#e5e7eb' }}>
+            💡 <strong>Giải pháp nhanh nhất:</strong> Hãy chuyển sang tab <strong style={{ color: '#06b6d4' }}>"Tải File Trực Tiếp"</strong> và chọn file MP4/MP3 từ máy tính/điện thoại. AI sẽ chép lời & xào nấu kịch bản ngay trong 1 giây mà không bị phụ thuộc vào chặn link Facebook!
+          </div>
         </div>
       )}
 
@@ -99,7 +86,7 @@ export default function InputSection({ onProcessUrl, onProcessFile, isLoading, l
               <input
                 type="url"
                 className="url-input"
-                placeholder="Dán link Facebook, YouTube, TikTok hoặc Shorts tại đây..."
+                placeholder="Dán link YouTube, TikTok hoặc Facebook tại đây..."
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 disabled={isLoading}
@@ -128,14 +115,6 @@ export default function InputSection({ onProcessUrl, onProcessFile, isLoading, l
               type="button"
               className="btn-secondary" 
               style={{ padding: '4px 10px', fontSize: '0.78rem' }}
-              onClick={() => setExampleUrl('https://www.facebook.com/watch/?v=123456789')}
-            >
-              Facebook Video
-            </button>
-            <button 
-              type="button"
-              className="btn-secondary" 
-              style={{ padding: '4px 10px', fontSize: '0.78rem' }}
               onClick={() => setExampleUrl('https://www.tiktok.com/@example/video/123456789')}
             >
               TikTok Video
@@ -147,6 +126,7 @@ export default function InputSection({ onProcessUrl, onProcessFile, isLoading, l
           <div 
             className="dropzone"
             onClick={() => document.getElementById('file-upload-input').click()}
+            style={{ border: '2px dashed rgba(6, 182, 212, 0.4)', background: 'rgba(6, 182, 212, 0.04)' }}
           >
             <input 
               id="file-upload-input"
@@ -156,14 +136,14 @@ export default function InputSection({ onProcessUrl, onProcessFile, isLoading, l
               onChange={handleFileChange}
               disabled={isLoading}
             />
-            <div className="dropzone-icon">
-              <FileAudio size={24} />
+            <div className="dropzone-icon" style={{ background: 'rgba(6, 182, 212, 0.15)' }}>
+              <FileAudio size={28} color="#06b6d4" />
             </div>
-            <div style={{ fontSize: '1rem', fontWeight: 600, marginBottom: 4 }}>
-              {selectedFile ? selectedFile.name : 'Kéo & thả file Video/Audio vào đây'}
+            <div style={{ fontSize: '1.05rem', fontWeight: 700, marginBottom: 4, color: '#fff' }}>
+              {selectedFile ? selectedFile.name : 'Nhấp vào đây hoặc Kéo & thả file Video/Audio vào đây'}
             </div>
-            <div style={{ fontSize: '0.85rem', color: '#9ca3af' }}>
-              {selectedFile ? `${(selectedFile.size / (1024 * 1024)).toFixed(2)} MB` : 'Hỗ trợ MP4, MKV, MP3, WAV, M4A (Tối đa 100MB)'}
+            <div style={{ fontSize: '0.85rem', color: '#06b6d4', fontWeight: 600 }}>
+              {selectedFile ? `${(selectedFile.size / (1024 * 1024)).toFixed(2)} MB` : '⚡ 100% Thành công ngay lập tức - Hỗ trợ MP4, MP3, WAV, M4A'}
             </div>
           </div>
 
@@ -172,12 +152,12 @@ export default function InputSection({ onProcessUrl, onProcessFile, isLoading, l
               className="btn-primary" 
               onClick={handleFileSubmit} 
               disabled={isLoading || !selectedFile}
-              style={{ marginLeft: 'auto' }}
+              style={{ marginLeft: 'auto', background: 'linear-gradient(135deg, #06b6d4, #3b82f6)' }}
             >
               {isLoading ? (
                 <><div className="spinner"></div> Đang xử lý...</>
               ) : (
-                <><Sparkles size={18} /> Chép Lời Từ File</>
+                <><Zap size={18} /> Chép Lời & Xào Nấu Ngay</>
               )}
             </button>
           </div>
@@ -188,8 +168,8 @@ export default function InputSection({ onProcessUrl, onProcessFile, isLoading, l
         <div style={{ marginTop: 24, padding: 16, background: 'rgba(99, 102, 241, 0.1)', borderRadius: 12, border: '1px solid rgba(99, 102, 241, 0.3)', display: 'flex', alignItems: 'center', gap: 12 }}>
           <div className="spinner" style={{ borderColor: '#6366f1', borderTopColor: 'transparent' }}></div>
           <div>
-            <div style={{ fontWeight: 600, fontSize: '0.9rem', color: '#a5b4fc' }}>{loadingStatus || 'Đang trích xuất dữ liệu âm thanh...'}</div>
-            <div style={{ fontSize: '0.8rem', color: '#9ca3af' }}>AI Gemini đang tự động lắng nghe và dịch chuẩn xác tiếng Việt. Vui lòng chờ vài giây...</div>
+            <div style={{ fontWeight: 600, fontSize: '0.9rem', color: '#a5b4fc' }}>{loadingStatus || 'Đang xử lý dữ liệu...'}</div>
+            <div style={{ fontSize: '0.8rem', color: '#9ca3af' }}>AI đang tự động phân tích và tạo kịch bản mới cho bạn. Vui lòng chờ vài giây...</div>
           </div>
         </div>
       )}
