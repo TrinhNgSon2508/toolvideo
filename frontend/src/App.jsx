@@ -27,7 +27,7 @@ export default function App() {
   const [originalTranscript, setOriginalTranscript] = useState('');
   const [rewrittenScript, setRewrittenScript] = useState('');
 
-  // NEW: Competitor Visual Analysis & Veo3 Prompts State
+  // Competitor Visual Analysis & Veo3 Prompts State
   const [competitorAnalysis, setCompetitorAnalysis] = useState(null);
   const [veo3Data, setVeo3Data] = useState(null);
   const [isGeneratingVeo3, setIsGeneratingVeo3] = useState(false);
@@ -47,6 +47,40 @@ export default function App() {
     return provider === 'groq' ? groqApiKey : apiKey;
   };
 
+  /**
+   * Browser-Side Auto Extractor: Directly fetches media stream via Client Browser
+   * (Circumvents Cloud Serverless Data-Center IP blocks for Facebook Reels)
+   */
+  const tryClientSideBrowserExtract = async (targetUrl) => {
+    try {
+      console.log('[Browser Auto-Extractor] Attempting direct client media fetch for:', targetUrl);
+      const res = await fetch('https://api.cobalt.tools/api/json', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ url: targetUrl, isAudioOnly: true })
+      });
+
+      if (!res.ok) return null;
+      const data = await res.json();
+
+      const mediaUrl = data.url || (data.picker && data.picker[0] ? data.picker[0].url : null);
+      if (!mediaUrl) return null;
+
+      console.log('[Browser Auto-Extractor] Direct stream URL obtained, downloading Blob in browser...');
+      const blobRes = await fetch(mediaUrl);
+      const blob = await blobRes.blob();
+      
+      const file = new File([blob], `fb_auto_extract_${Date.now()}.mp3`, { type: blob.type || 'audio/mp3' });
+      return file;
+    } catch (err) {
+      console.warn('[Browser Auto-Extractor] Client-side fetch failed, falling back to backend:', err.message);
+      return null;
+    }
+  };
+
   // Step 1 Handler: Download URL & Transcribe Audio
   const handleProcessUrl = async (url) => {
     const activeKey = getActiveApiKey();
@@ -57,9 +91,19 @@ export default function App() {
 
     setIsLoading(true);
     setErrorMessage('');
-    setLoadingStatus('1/3. Đang kết nối và trích xuất audio từ URL video đối thủ...');
+    setLoadingStatus('1/3. Trình duyệt đang tự động bóc tách stream âm thanh từ video...');
 
+    // Attempt 1: Browser-Side Auto Extraction (Instant & Bypass Cloud IP block)
+    const clientExtractedFile = await tryClientSideBrowserExtract(url);
+    if (clientExtractedFile) {
+      console.log('[Browser Auto-Extractor] Client extraction succeeded! Passing file directly...');
+      await handleProcessFile(clientExtractedFile);
+      return;
+    }
+
+    // Attempt 2: Server Backend Extraction
     try {
+      setLoadingStatus('1/3. Đang kết nối server trích xuất audio từ đường dẫn...');
       const extractRes = await fetch(`${API_BASE}/extract-url`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -91,7 +135,7 @@ export default function App() {
 
       setOriginalTranscript(transcribeData.transcript);
 
-      // 3. Automatically analyze competitor visual format and motion style
+      // Analyze competitor
       setLoadingStatus('3/3. AI đang phân tích Định dạng Visual, Loại chuyển động & Tông màu video đối thủ...');
       const analyzeRes = await fetch(`${API_BASE}/analyze-competitor`, {
         method: 'POST',
@@ -161,7 +205,7 @@ export default function App() {
 
       setOriginalTranscript(transcribeData.transcript);
 
-      // 3. Analyze competitor
+      // Analyze competitor
       setLoadingStatus('3/3. AI đang phân tích Định dạng Visual, Loại chuyển động & Tông màu video đối thủ...');
       const analyzeRes = await fetch(`${API_BASE}/analyze-competitor`, {
         method: 'POST',
@@ -226,7 +270,7 @@ export default function App() {
     }
   };
 
-  // NEW: Generate Veo3 Prompts Step
+  // Generate Veo3 Prompts Step
   const handleGenerateVeo3Prompts = async () => {
     const activeKey = getActiveApiKey();
     if (!activeKey) {
