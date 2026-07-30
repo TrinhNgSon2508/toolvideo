@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, UploadCloud, Sparkles, FileAudio, AlertCircle } from 'lucide-react';
+import { Link, UploadCloud, Sparkles, FileAudio, AlertCircle, ExternalLink, HelpCircle } from 'lucide-react';
 
 export default function InputSection({ onProcessUrl, onProcessFile, isLoading, loadingStatus }) {
   const [url, setUrl] = useState('');
@@ -68,8 +68,26 @@ export default function InputSection({ onProcessUrl, onProcessFile, isLoading, l
       </div>
 
       {errorMsg && (
-        <div style={{ background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.4)', color: '#fca5a5', padding: '12px 16px', borderRadius: 10, fontSize: '0.88rem', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 8 }}>
-          <AlertCircle size={18} /> {errorMsg}
+        <div style={{ background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.4)', color: '#fca5a5', padding: '14px 18px', borderRadius: 12, marginBottom: 20 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, marginBottom: 4 }}>
+            <AlertCircle size={18} /> {errorMsg}
+          </div>
+          {url.includes('facebook.com') && (
+            <div style={{ marginTop: 10, fontSize: '0.82rem', color: '#e5e7eb', background: 'rgba(0,0,0,0.3)', padding: 10, borderRadius: 8 }}>
+              💡 <strong>Mẹo với Video Facebook bị giới hạn riêng tư trên Web:</strong>
+              <div style={{ marginTop: 6, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                <a 
+                  href={`https://snapsave.app/`} 
+                  target="_blank" 
+                  rel="noreferrer"
+                  style={{ color: '#06b6d4', textDecoration: 'underline', display: 'inline-flex', alignItems: 'center', gap: 4 }}
+                >
+                  Bóc tách nhanh file MP4 qua SnapSave <ExternalLink size={12} />
+                </a>
+                <span>rồi kéo thả vào tab <strong>Tải File Trực Tiếp</strong> nhé!</span>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
