@@ -2,35 +2,55 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import Groq from 'groq-sdk';
 
 /**
- * Analyzes competitor video content and visual style
+ * Advanced Competitor Video Analyzer: Video Motion, Visual Style, Voiceover Tone, & Outperform Strategy
  */
 export async function analyzeCompetitorVideo({
   transcript,
   apiKey,
-  provider = 'gemini'
+  provider = 'groq'
 }) {
   const prompt = `
-Bạn là một Đạo diễn Điện ảnh & Chuyên gia Phân tích Content Video Ngắn (TikTok/Reels/Shorts/YouTube) hàng đầu.
+Bạn là một Đạo diễn Điện ảnh & Chuyên gia Phân tích Content Video Ngắn (TikTok/Reels/Shorts/YouTube) số 1 thị trường.
 
-Dưới đây là LỜI THOẠI VÀ NỘI DUNG trích xuất từ video của đối thủ:
+Dưới đây là NỘI DUNG VÀ LỜI THOẠI TRÍCH XUẤT TỪ VIDEO ĐỐI THỦ:
 \`\`\`
 ${transcript}
 \`\`\`
 
 NHIỆM VỤ CỦA BẠN:
-Hãy phân tích chuyên sâu video này về mặt NỘI DUNG, HÌNH ẢNH và CHUYỂN ĐỘNG (Visual & Motion Type), sau đó đúc kết phong cách để xây dựng một kênh mới nhất quán.
+Hãy phân tích mổ xẻ toàn diện video đối thủ trên 3 TRỤ CỘT CHÍNH: (1) VIDEO/CHUYỂN ĐỘNG, (2) HÌNH ẢNH/PHONG CÁCH NGHỆ THUẬT, (3) GIỌNG ĐỌC/ÂM THANH. Từ đó đưa ra BẢN ĐÚC KẾT ĐỂ BẠN LÀM VIDEO HOÀN CHỈNH & VƯỢT TRỘI HƠN ĐỐI THỦ (Outperform Strategy).
 
-Hãy trả về kết quả định dạng JSON chuẩn xác theo cấu trúc sau (không kèm văn bản thừa ngoài JSON):
+Hãy trả về kết quả định dạng JSON chuẩn xác theo cấu trúc sau (không chứa bất kỳ văn bản thừa nào ngoài JSON):
+
 {
-  "visualFormat": "Ảnh tĩnh ghép chuyển động / Video AI Motion chuyển động / AI Avatar nói chuyện / Footage điện ảnh B-Roll",
-  "motionType": "Góc quay tĩnh / Zoom in - Zoom out dồn dập / Camera Pan ngang / Cinematic Motion 3D / Slow motion",
-  "pacing": "Nhanh dồn dập (1-2s đổi cảnh) / Trung bình (3-4s đổi cảnh) / Chậm lắng đọng",
-  "colorAndLighting": "Tông màu tối bí ẩn (Dark Moody) / Rực rỡ hiện đại (Vibrant Modern) / Cổ điển Cinematic / Tối giản (Minimalist)",
-  "contentHookType": "Gây tò mò bí ẩn / Đặt câu hỏi nhức nhối / Tình huống Drama / Thách thức suy nghĩ",
-  "targetAudience": "Đối tượng khán giả phù hợp nhất",
-  "channelThemeSuggestion": "Gợi ý Tên & Chủ đề Kênh độc đáo dựa trên phong cách đối thủ",
-  "masterStylePrompt": "Một đoạn Prompt Tiếng Anh (Master Visual Prompt) mô tả nhân vật, bối cảnh, tông màu, độ phân giải 8k hyperrealistic, nhất quán 100% để dùng chung cho mọi video trên kênh",
-  "videoStructureAnalysis": "Tóm tắt cấu trúc cách đối thủ giữ chân người xem từ đầu đến cuối"
+  "videoAnalysis": {
+    "visualFormat": "Ảnh tĩnh ghép hiệu ứng / Video AI chuyển động 3D / AI Avatar nói chuyện / B-Roll điện ảnh",
+    "motionType": "Góc quay tĩnh / Zoom dồn dập / Camera Tracking / Pan ngang / Cinematic Slow motion",
+    "pacing": "Rất nhanh (1-2s đổi cảnh) / Trung bình (3-5s) / Chậm lắng đọng",
+    "retentionTechnique": "Kỹ thuật giữ chân người xem của đối thủ (Pattern Interrupt, Hook 3s, Visual Loops...)"
+  },
+  "visualStyleAnalysis": {
+    "colorGrading": "Tông màu tối bí ẩn (Dark Moody) / Rực rỡ hiện đại (Vibrant Modern) / Cổ điển Cinematic / Tối giản",
+    "subjectAndEnvironment": "Mô tả phong cách nhân vật, bối cảnh và chất liệu chi tiết",
+    "masterStylePrompt": "Đoạn Prompt Tiếng Anh (Master Visual Style Prompt) độ phân giải 8k, photorealistic, cinematic lighting, nhất quán 100% cho toàn bộ series video của kênh"
+  },
+  "voiceAnalysis": {
+    "recommendedGenderAndDialect": "Giọng Nam/Nữ, vùng miền (Giọng Bắc trầm ấm / Giọng Nam sôi nổi / Giọng Nữ lôi cuốn)",
+    "toneAndEmotion": "Cảm xúc đọc: Drama bí ẩn / Hào hứng truyền cảm hứng / Chuyên gia uy tín / Hài hước Gen-Z",
+    "speakingSpeed": "Nhanh dồn dập / Vừa phải dễ nghe / Nhấn từng từ lắng đọng",
+    "bgmAndSfxRecommendation": "Gợi ý thể loại Nhạc nền (BGM: Synthwave/Lo-Fi/Epic Cinematic) & Hiệu ứng âm thanh (SFX: Riser, Swoosh, Pop)"
+  },
+  "outperformStrategy": {
+    "competitorWeakness": "Điểm yếu lớn nhất trong video của đối thủ (Ví dụ: Lời thoại lan man, thiếu hình ảnh minh họa đắt giá, kết bài chưa ấn tượng)",
+    "fiveImprovementKeys": [
+      "Bí quyết 1: Tối ưu lại 3 giây đầu tiên (Hook) cực mạnh chạm nỗi đau người xem",
+      "Bí quyết 2: Đẩy nhanh nhịp chuyển cảnh gấp 1.5 lần",
+      "Bí quyết 3: Nâng cấp hình ảnh chất lượng 8k Cinematic sinh động hơn",
+      "Bí quyết 4: Dùng giọng đọc AI cảm xúc chuẩn tông hơn",
+      "Bí quyết 5: Thêm Call-To-Action (CTA) chốt đơn/follow thuyết phục"
+    ],
+    "actionPlanSummary": "Đút rút hành động cụ thể để bạn làm kịch bản & dựng video vượt trội hơn đối thủ ngay hôm nay"
+  }
 }
 `;
 
