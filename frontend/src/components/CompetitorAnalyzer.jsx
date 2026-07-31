@@ -174,7 +174,7 @@ export default function CompetitorAnalyzer({ analysis, onGenerateVeo3, isGenerat
       <div style={{ textAlign: 'center', marginTop: 24 }}>
         <button 
           className="btn-primary" 
-          onClick={onGenerateVeo3}
+          onClick={() => onGenerateVeo3()}
           disabled={isGeneratingVeo3}
           style={{ margin: '0 auto', padding: '14px 36px', background: 'linear-gradient(135deg, #ec4899, #6366f1)', boxShadow: '0 0 25px rgba(236, 72, 153, 0.4)' }}
         >
