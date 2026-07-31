@@ -2,7 +2,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import Groq from 'groq-sdk';
 
 /**
- * Generates Veo3 / Sora prompts and consistent channel strategy
+ * Generates Veo3/Sora Video Prompts AND Gemini/ChatGPT DALL-E Image Prompts
  */
 export async function generateVeo3ChannelPrompts({
   analysisData,
@@ -11,23 +11,27 @@ export async function generateVeo3ChannelPrompts({
   provider = 'gemini'
 }) {
   const prompt = `
-Bạn là Chuyên gia Prompt Engineering số 1 thế giới dành cho các mô hình tạo Video AI tiên tiến nhất hiện nay như Google Veo 3, OpenAI Sora, Runway Gen-3.
+Bạn là Chuyên gia Prompt Engineering số 1 thế giới dành cho các AI Generator hàng đầu như Google Gemini Imagen 3, ChatGPT DALL-E 3, Midjourney, Google Veo 3, và OpenAI Sora.
 
 DƯỚI ĐÂY LÀ PHÂN TÍCH PHONG CÁCH KÊNH (MASTER STYLE):
-- Thể loại Visual: ${analysisData.visualFormat || 'Cinematic AI Motion'}
-- Phong cách chuyển động Camera: ${analysisData.motionType || 'Cinematic Motion'}
-- Tông màu & Ánh sáng: ${analysisData.colorAndLighting || 'Dark Moody'}
-- Master Visual Style Prompt: ${analysisData.masterStylePrompt || '8k cinematic, hyperrealistic'}
+- Thể loại Visual: ${analysisData.videoAnalysis?.visualFormat || 'Cinematic AI Motion'}
+- Phong cách chuyển động Camera: ${analysisData.videoAnalysis?.motionType || 'Cinematic Motion'}
+- Tông màu & Ánh sáng: ${analysisData.visualStyleAnalysis?.colorGrading || 'Dark Moody'}
+- Master Visual Style Prompt: ${analysisData.visualStyleAnalysis?.masterStylePrompt || '8k cinematic, hyperrealistic'}
 
-DƯỚI ĐÂY LÀ KỊCH BẢN MỚI CẦN TẠO PROMPT VEO3:
+DƯỚI ĐÂY LÀ KỊCH BẢN MỚI CẦN TẠO PROMPT HÌNH ẢNH & VIDEO:
 \`\`\`
 ${newScriptText}
 \`\`\`
 
 NHIỆM VỤ CỦA BẠN:
-Hãy chia kịch bản trên thành các CẢNH HÌNH ẢNH (Scenes) ngắn 3s - 5s - 10s. Với mỗi Cảnh, hãy viết bộ Prompt tiếng Anh cực kỳ chi tiết chuẩn định dạng Google Veo 3 / Sora để người dùng chỉ cần bấm nút Copy dán vào Veo3 tạo ra video động chuẩn nhất quán với phong cách kênh.
+Hãy chia kịch bản thành từng CẢNH HÌNH ẢNH (Scenes) ngắn 3s - 5s - 10s. 
+Với MỖI CẢNH, hãy tạo ra 3 BỘ PROMPT TIẾNG ANH CHUYÊN NGHIỆP:
+1. **Gemini / Imagen 3 Prompt**: Tối ưu chuẩn tạo ảnh siêu nét 8K, độ phân giải cực cao trên Google Gemini.
+2. **ChatGPT / DALL-E 3 Prompt**: Tối ưu chuẩn tạo ảnh nghệ thuật giàu chi tiết trên ChatGPT (DALL-E 3).
+3. **Veo3 / Sora Video Prompt**: Tối ưu tạo video chuyển động điện ảnh 24fps (Cinematic motion, camera movement).
 
-Trả về kết quả chuẩn định dạng JSON theo cấu trúc sau (không kèm văn bản thừa):
+Trả về kết quả chuẩn định dạng JSON theo cấu trúc sau (không chứa bất kỳ văn bản thừa nào ngoài JSON):
 {
   "channelName": "Tên kênh gợi ý",
   "channelConcept": "Tóm tắt chủ đề kênh",
@@ -38,8 +42,10 @@ Trả về kết quả chuẩn định dạng JSON theo cấu trúc sau (không 
       "timestamp": "0:00 - 0:03",
       "voiceover": "Lời thoại phân đoạn",
       "visualDescriptionVi": "Mô tả hình ảnh bằng Tiếng Việt",
-      "veo3Prompt": "Full English Prompt cho Veo3: [Subject description], [action and movement], [camera shot/movement e.g. cinematic tracking shot, slow pan], [environment & lighting], [art style e.g. photorealistic 8k, Unreal Engine 5 render, cinematic lighting], 24fps",
-      "negativePrompt": "blurry, low quality, deformed, static image, text watermark"
+      "geminiImagePrompt": "Full English Prompt cho Google Gemini Imagen 3: Highly detailed 8k photorealistic image of [subject], [environment & lighting], cinematic style, ratio 9:16, --no text watermark",
+      "chatgptImagePrompt": "Full English Prompt cho ChatGPT DALL-E 3: Create a cinematic 9:16 vertical image showing [subject] in [setting], dramatic lighting, hyper-realistic 8k resolution, vivid details, no text overlay",
+      "veo3VideoPrompt": "Full English Prompt cho Veo3/Sora Video: [Subject], [action and movement], [cinematic camera movement e.g. slow pan, tracking shot], [environment & lighting], 8k render, 24fps",
+      "negativePrompt": "blurry, low quality, deformed, text watermark, ugly"
     }
   ]
 }
