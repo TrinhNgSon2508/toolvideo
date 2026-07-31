@@ -2,80 +2,56 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import Groq from 'groq-sdk';
 
 /**
- * Visual Art Style Prompt Presets dictionary
- */
-export const ART_STYLE_PRESETS = {
-  blackboard_sketch: {
-    name: "Vẽ tay phác thảo nét chì nền đen (Minimalist Pencil Sketch on Dark Background)",
-    styleKeywords: "Minimalist hand-drawn white pencil sketch art style on dark charcoal blackboard background, simple cute 2D monochrome line art characters, high contrast black and white drawing, emotional glowing element, clean vector aesthetic, 9:16 vertical ratio",
-    negativePrompt: "photorealistic, 3D render, realistic landscape, colorful, real human photograph, detailed environment"
-  },
-  minimalist_2d: {
-    name: "Hoạt hình 2D Tối giản (Minimalist 2D Vector Animation)",
-    styleKeywords: "Minimalist 2D flat vector illustration, cute cartoon character design, pastel color palette, clean outlines, simple aesthetic, vertical 9:16",
-    negativePrompt: "photorealistic, 3D render, realistic human, dark gloomy, complex textures"
-  },
-  photorealistic_cinematic: {
-    name: "Ảnh chụp 8K Điện ảnh (3D Photorealistic Cinematic)",
-    styleKeywords: "8k photorealistic cinematic image, dramatic lighting, shot on 35mm lens, depth of field, hyper-realistic detail, Unreal Engine 5 render, vertical 9:16",
-    negativePrompt: "cartoon, 2d illustration, sketch, drawing, low quality, anime"
-  },
-  cyberpunk_neon: {
-    name: "Cyberpunk Neon Đêm (Cyberpunk Neon City)",
-    styleKeywords: "Cyberpunk aesthetic, glowing purple and cyan neon light reflections, futuristic dark city setting, highly detailed 8k cinematic render, vertical 9:16",
-    negativePrompt: "daylight, minimalist, simple drawing, vintage, bright pastel"
-  }
-};
-
-/**
- * Generates image & video prompts strictly locked onto selected Art Style
+ * Dynamic Prompt Generator: Clones & Binds 100% to THAT specific competitor's visual style
  */
 export async function generateVeo3ChannelPrompts({
   analysisData = {},
   newScriptText,
-  selectedArtStyle = 'blackboard_sketch', // Default to hand-drawn sketch if matching competitor
   apiKey,
   provider = 'gemini'
 }) {
+  const detectedStyleName = analysisData.detectedArtMedium || 'Phong cách nghệ thuật của đối thủ';
+  const extractedStylePrompt = analysisData.extractedVisualStylePrompt || analysisData.visualStyleAnalysis?.masterStylePrompt || 'photorealistic 8k, cinematic lighting';
+  const negativePrompt = analysisData.negativePrompt || 'blurry, distorted, wrong style';
   const visualDNA = analysisData.visualDNA || {};
-
-  // Find exact art style preset or default to blackboard sketch
-  const stylePreset = ART_STYLE_PRESETS[selectedArtStyle] || ART_STYLE_PRESETS.blackboard_sketch;
 
   const prompt = `
 Bạn là Chuyên gia Prompt Engineering số 1 thế giới dành cho các AI Image & Video Generators như Google Gemini (Imagen 3), ChatGPT (DALL-E 3), Midjourney, Google Veo 3 và OpenAI Sora.
 
-BẮT BUỘC PHONG CÁCH NGHỆ THUẬT (ART STYLE):
-- Tên phong cách: ${stylePreset.name}
-- Từ khóa Prompt chuẩn: "${stylePreset.styleKeywords}"
-- Từ khóa cần tránh (Negative Prompt): "${stylePreset.negativePrompt}"
+DƯỚI ĐÂY LÀ PHONG CÁCH NGHỆ THUẬT VÀ VISUAL DNA ĐỐI THỦ VỪA BÓC TÁCH:
+- Tên phong cách nghệ thuật đối thủ: "${detectedStyleName}"
+- Master Style Prompt đối thủ: "${extractedStylePrompt}"
+- Nhân vật / Chủ thể đặc trưng: "${visualDNA.characterSubjectDetails || ''}"
+- Bối cảnh & Không gian: "${visualDNA.environmentAndSetting || ''}"
+- Tông màu & Ánh sáng: "${visualDNA.colorPaletteAndLighting || ''}"
 
 DƯỚI ĐÂY LÀ KỊCH BẢN MỚI CẦN TẠO PROMPT HÌNH ẢNH & VIDEO:
 \`\`\`
 ${newScriptText}
 \`\`\`
 
-YÊU CẦU QUAN TRỌNG NHẤT:
-MỌI PROMPT TẠO ẢNH CHO GEMINI VÀ CHATGPT PHẢI TUÂN THỦ 100% THEO PHONG CÁCH NGHỆ THUẬT "${stylePreset.name}". 
-Nếu phong cách là "Vẽ tay phác thảo nét chì nền đen", KHÔNG ĐƯỢC TẠO RA ẢNH 3D HAY PHONG CẢNH CHÂN THỰC, mà PHẢI LÀ NÉT VẼ TAY 2D TRẮNG ĐEN TRÊN NỀN TỐI ĐÚNG VỚI NGUYÊN BẢN ĐỐI THỦ.
+YÊU CẦU BẮT BUỘC KHẮC KHEN:
+BẤT KỲ VIDEO ĐỐI THỦ NÀO ĐƯỢC ĐƯA VÀO (Vẽ chì nền đen, Hoạt hình 2D, 3D Anime, Chân thực, hay Đất sét...), BẠN PHẢI TẠO RA BỘ PROMPT BÁM SÁT 100% THEO ĐÚNG PHONG CÁCH NGHỆ THUẬT "${detectedStyleName}" CỦA VIDEO ĐÓ!
+- Không tự ý chuyển đổi sang 3D hay phong cảnh chân thực nếu video đối thủ dùng nét vẽ phác thảo hay hoạt hình!
+- Mọi Prompt ảnh cho Gemini và ChatGPT ở từng cảnh phải chứa từ khóa style "${extractedStylePrompt}" và giữ đúng góc quay 9:16 vertical ratio.
 
-Trả về kết quả chuẩn định dạng JSON theo cấu trúc sau (không chứa bất kỳ văn bản thừa nào ngoài JSON):
+Trả về kết quả chuẩn định dạng JSON theo cấu trúc sau (không chứa văn bản thừa):
 
 {
   "channelName": "Tên kênh gợi ý",
   "channelConcept": "Tóm tắt chủ đề kênh",
-  "selectedArtStyleName": "${stylePreset.name}",
-  "masterStylePrompt": "${stylePreset.styleKeywords}",
+  "detectedArtStyleName": "${detectedStyleName}",
+  "masterStylePrompt": "${extractedStylePrompt}",
   "scenes": [
     {
       "sceneNumber": 1,
       "timestamp": "0:00 - 0:03",
       "voiceover": "Lời thoại phân đoạn",
-      "visualDescriptionVi": "Mô tả hình ảnh bằng Tiếng Việt theo đúng phong cách nghệ thuật",
-      "geminiImagePrompt": "${stylePreset.styleKeywords}, [subject & action for scene 1], emotional glowing heart/light, no text overlay, ratio 9:16 --ar 9:16",
-      "chatgptImagePrompt": "Create an image in ${stylePreset.name} style: ${stylePreset.styleKeywords}. Depict [subject & action for scene 1], 9:16 ratio vertical framing, no text overlay",
-      "veo3VideoPrompt": "Vertical 9:16 video in ${stylePreset.name} style: ${stylePreset.styleKeywords}, [subject action], gentle animation, 24fps",
-      "negativePrompt": "${stylePreset.negativePrompt}"
+      "visualDescriptionVi": "Mô tả hình ảnh bằng Tiếng Việt bám sát 100% phong cách đối thủ",
+      "geminiImagePrompt": "${extractedStylePrompt}, [subject & action in scene 1], vertical 9:16 ratio, clean framing, high quality --ar 9:16",
+      "chatgptImagePrompt": "An image in ${detectedStyleName} style (${extractedStylePrompt}): [subject & action in scene 1], 9:16 vertical ratio, highly detailed",
+      "veo3VideoPrompt": "Vertical 9:16 video in ${detectedStyleName} style (${extractedStylePrompt}): [subject action in scene 1], 24fps motion",
+      "negativePrompt": "${negativePrompt}"
     }
   ]
 }

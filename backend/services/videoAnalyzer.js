@@ -2,7 +2,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import Groq from 'groq-sdk';
 
 /**
- * Advanced Competitor Video Analyzer with Visual DNA Extraction
+ * Dynamic Competitor Video Analyzer: Auto-detects Exact Art Medium & Visual Style
  */
 export async function analyzeCompetitorVideo({
   transcript,
@@ -10,44 +10,45 @@ export async function analyzeCompetitorVideo({
   provider = 'groq'
 }) {
   const prompt = `
-Bạn là một Đạo diễn Điện ảnh & Chuyên gia Phân tích Visual Content Video Ngắn (TikTok/Reels/Shorts/YouTube) số 1 thị trường.
+Bạn là một Đạo diễn Điện ảnh & Chuyên gia Phân tích Visual Content Video Ngắn (TikTok/Reels/Shorts/YouTube) số 1 thế giới.
 
-Dưới đây là NỘI DUNG VÀ LỜI THOẠI TRÍCH XUẤT TỪ VIDEO ĐỐI THỦ:
+DƯỚI ĐÂY LÀ NỘI DUNG VÀ LỜI THOẠI TRÍCH XUẤT TỪ VIDEO ĐỐI THỦ:
 \`\`\`
 ${transcript}
 \`\`\`
 
-NHIỆM VỤ CỦA BẠN:
-Hãy bóc tách "DNA HÌNH ẢNH & VISUAL ANCHORS" chi tiết nhất của đối thủ để các ảnh/video AI tạo ra sau này BÁM SÁT 100% GIỐNG HỆT PHONG CÁCH VÀ BỐI CẢNH CỦA ĐỐI THỦ.
+NHIỆM VỤ QUAN TRỌNG NHẤT:
+Hãy phân tích và BÓC TÁCH TỰ ĐỘNG PHONG CÁCH NGHỆ THUẬT VẼ/DỰNG HÌNH (Exact Art Medium & Visual Style) của đối thủ.
+Ví dụ:
+- Nếu video đối thủ là nét vẽ phác thảo chì trắng trên nền tối 2D ➔ Phải bóc tách chuẩn "Minimalist 2D pencil sketch on dark background".
+- Nếu video đối thủ là Hoạt hình 2D Anime ➔ Phải bóc tách "2D Anime Japanese Animation".
+- Nếu video đối thủ là 3D Chân thực ➔ Phải bóc tách "3D Photorealistic 8K Render".
+- Nếu video đối thủ là Đất sét / Sand art / Cyberpunk ➔ Bóc tách chính xác phong cách đó.
 
 Trả về kết quả định dạng JSON chuẩn xác theo cấu trúc sau (không kèm văn bản thừa):
 
 {
+  "detectedArtMedium": "Tên tiếng Việt phong cách nghệ thuật bóc tách được từ đối thủ (Ví dụ: Vẽ phác thảo chì 2D nền đen / Hoạt hình Anime / 3D Điện ảnh)",
+  "extractedVisualStylePrompt": "Đoạn Prompt Tiếng Anh chuẩn tả chính xác 100% phong cách nghệ thuật, chất liệu, màu sắc, bối cảnh của đối thủ",
+  "negativePrompt": "Các từ khóa đối lập cần loại bỏ để không bị chệch phong cách đối thủ",
   "videoAnalysis": {
-    "visualFormat": "Ảnh tĩnh ghép hiệu ứng / Video AI chuyển động 3D / AI Avatar nói chuyện / B-Roll điện ảnh",
-    "motionType": "Góc quay tĩnh / Zoom dồn dập / Camera Tracking / Pan ngang / Cinematic Slow motion",
-    "pacing": "Rất nhanh (1-2s đổi cảnh) / Trung bình (3-5s) / Chậm lắng đọng",
-    "retentionTechnique": "Kỹ thuật giữ chân người xem của đối thủ"
+    "visualFormat": "Định dạng hình ảnh đối thủ",
+    "motionType": "Loại chuyển động camera",
+    "pacing": "Nhịp độ đổi cảnh"
   },
   "visualDNA": {
-    "characterSubjectDetails": "Mô tả siêu chi tiết nhân vật/vật thể chính đối thủ (Tuổi tác, giới tính, kiểu tóc, trang phục đặc trưng, biểu cảm)",
-    "environmentAndSetting": "Bối cảnh chi tiết đối thủ hay dùng (Phòng làm việc hiện đại, đường phố ban đêm, studio ánh sáng neon, phong cảnh núi rừng...)",
-    "colorPaletteAndLighting": "Tông màu & Ánh sáng đặc trưng (Ánh sáng tím Cyberpunk, Tông tối Dark Moody, Nắng vàng Warm Golden, Ánh sáng Studio chuyên nghiệp)",
-    "cameraFramingStyle": "Cách xếp khung hình đặc trưng (Cận cảnh khuôn mặt, Góc nhìn thứ nhất 1st person, Góc rộng cinematic 9:16)"
-  },
-  "visualStyleAnalysis": {
-    "colorGrading": "Tông màu chủ đạo",
-    "subjectAndEnvironment": "Tóm tắt bối cảnh",
-    "masterStylePrompt": "Một đoạn Prompt Tiếng Anh chuẩn (Master Visual DNA Prompt) mô tả nhân vật, bối cảnh, ánh sáng, góc quay 9:16, 8k resolution, photorealistic để tạo ảnh bám sát 100% giống video đối thủ"
+    "characterSubjectDetails": "Nhân vật / Chủ thể chính của đối thủ",
+    "environmentAndSetting": "Bối cảnh & Không gian đối thủ",
+    "colorPaletteAndLighting": "Tông màu & Ánh sáng đối thủ",
+    "cameraFramingStyle": "Góc quay & Khung hình"
   },
   "voiceAnalysis": {
-    "recommendedGenderAndDialect": "Giọng Nam/Nữ, vùng miền",
-    "toneAndEmotion": "Cảm xúc đọc",
-    "speakingSpeed": "Tốc độ đọc",
-    "bgmAndSfxRecommendation": "Gợi ý BGM & SFX"
+    "recommendedGenderAndDialect": "Giọng đọc AI phù hợp",
+    "toneAndEmotion": "Tông cảm xúc",
+    "bgmAndSfxRecommendation": "BGM & SFX"
   },
   "outperformStrategy": {
-    "competitorWeakness": "Điểm yếu lớn nhất của đối thủ",
+    "competitorWeakness": "Điểm yếu của đối thủ",
     "fiveImprovementKeys": [
       "Bí quyết 1",
       "Bí quyết 2",
@@ -55,7 +56,7 @@ Trả về kết quả định dạng JSON chuẩn xác theo cấu trúc sau (kh
       "Bí quyết 4",
       "Bí quyết 5"
     ],
-    "actionPlanSummary": "Đút rút hành động"
+    "actionPlanSummary": "Hành động đút rút"
   }
 }
 `;
