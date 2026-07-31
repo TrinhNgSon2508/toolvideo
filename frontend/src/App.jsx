@@ -270,8 +270,8 @@ export default function App() {
     }
   };
 
-  // Generate Veo3 Prompts Step
-  const handleGenerateVeo3Prompts = async () => {
+  // Generate Veo3 Prompts Step with selected Art Style
+  const handleGenerateVeo3Prompts = async (selectedArtStyle = 'blackboard_sketch') => {
     const activeKey = getActiveApiKey();
     if (!activeKey) {
       setErrorMessage('Vui lòng nhập API Key!');
@@ -288,6 +288,7 @@ export default function App() {
         body: JSON.stringify({
           analysisData: competitorAnalysis || {},
           newScriptText: rewrittenScript || originalTranscript,
+          selectedArtStyle: selectedArtStyle,
           apiKey: activeKey,
           provider: provider
         })

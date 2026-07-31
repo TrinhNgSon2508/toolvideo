@@ -43,7 +43,7 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Backend is running' });
 });
 
-// Extract audio from video URL
+// Extract audio
 app.post('/api/extract-url', async (req, res) => {
   try {
     const { url } = req.body;
@@ -57,7 +57,7 @@ app.post('/api/extract-url', async (req, res) => {
   }
 });
 
-// Upload direct media file
+// Upload media file
 app.post('/api/upload-file', upload.single('mediaFile'), (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: 'Không nhận được file tải lên!' });
@@ -108,7 +108,7 @@ app.post('/api/rewrite', async (req, res) => {
   }
 });
 
-// NEW: Competitor Video Visual & Motion Analysis
+// Analyze competitor
 app.post('/api/analyze-competitor', async (req, res) => {
   try {
     const { transcript, apiKey, provider = 'groq' } = req.body;
@@ -121,13 +121,13 @@ app.post('/api/analyze-competitor', async (req, res) => {
   }
 });
 
-// NEW: Generate Veo3 Prompts & Channel Consistency Plan
+// Generate Veo3 & Image Prompts with selectedArtStyle
 app.post('/api/generate-veo3-prompts', async (req, res) => {
   try {
-    const { analysisData, newScriptText, apiKey, provider = 'groq' } = req.body;
+    const { analysisData, newScriptText, selectedArtStyle = 'blackboard_sketch', apiKey, provider = 'groq' } = req.body;
     if (!newScriptText) return res.status(400).json({ error: 'Kịch bản mới không được để trống!' });
 
-    const veo3Data = await generateVeo3ChannelPrompts({ analysisData: analysisData || {}, newScriptText, apiKey, provider });
+    const veo3Data = await generateVeo3ChannelPrompts({ analysisData: analysisData || {}, newScriptText, selectedArtStyle, apiKey, provider });
     res.json({ success: true, veo3Data });
   } catch (error) {
     res.status(500).json({ error: error.message });
