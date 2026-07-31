@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Copy, Check, Download, Film, Sparkles, Video, Zap, MessageSquare, AlertCircle, Info } from 'lucide-react';
+import { Copy, Check, Download, Film, Sparkles, Video, Zap, MessageSquare, AlertCircle } from 'lucide-react';
 
 export default function Veo3Studio({ veo3Data }) {
   const [copiedKey, setCopiedKey] = useState(null);
@@ -7,26 +7,31 @@ export default function Veo3Studio({ veo3Data }) {
   if (!veo3Data || !veo3Data.scenes) return null;
 
   const handleCopyPrompt = (promptText, key) => {
+    if (!promptText) return;
     navigator.clipboard.writeText(promptText);
     setCopiedKey(key);
     setTimeout(() => setCopiedKey(null), 2000);
   };
 
+  const defaultStylePrefix = "CRITICAL ART STYLE REQUIRED: 2D Minimalist hand-drawn white pencil chalk line-art sketch on pure dark charcoal blackboard background. Simple cute 2D monochrome line art characters ONLY. ABSOLUTELY NO REALISTIC PHOTOGRAPHY, NO REAL HUMANS, NO 3D RENDER.";
+
   const handleDownloadAllPrompts = () => {
     let fullText = `# 🚀 BỘ PROMPT TẠO ẢNH & VIDEO (GEMINI, CHATGPT DALL-E 3, VEO3 / SORA)\n\n`;
-    fullText += `📌 Phong cách nghệ thuật: ${veo3Data.selectedArtStyleName || 'Vẽ chì phác thảo 2D nền đen'}\n`;
-    fullText += `📌 Kênh: ${veo3Data.channelName || 'Kênh Mới'}\n`;
-    fullText += `🎨 Master Style Prompt: ${veo3Data.masterStylePrompt || ''}\n\n`;
+    fullText += `📌 Phong cách: Vẽ chì phác thảo 2D nền đen\n`;
+    fullText += `📌 Kênh: ${veo3Data.channelName || 'Kênh Mới'}\n\n`;
     fullText += `---------------------------------------------------\n\n`;
 
     veo3Data.scenes.forEach((sc) => {
+      const gPrompt = sc.geminiImagePrompt || sc.geminiPrompt || `${defaultStylePrefix} Scene: ${sc.visualDescriptionVi || sc.voiceover} --ar 9:16`;
+      const cPrompt = sc.chatgptImagePrompt || sc.chatgptPrompt || `${defaultStylePrefix} Scene: ${sc.visualDescriptionVi || sc.voiceover}, 9:16 ratio`;
+      const vPrompt = sc.veo3VideoPrompt || sc.veo3Prompt || sc.videoPrompt;
+
       fullText += `🎬 CẢNH ${sc.sceneNumber} (${sc.timestamp})\n`;
       fullText += `🗣️ Voiceover: ${sc.voiceover}\n`;
-      fullText += `🖼️ Mô tả tiếng Việt: ${sc.visualDescriptionVi}\n\n`;
-      fullText += `🔷 PROMPT GEMINI IMAGEN 3:\n${sc.geminiImagePrompt}\n\n`;
-      fullText += `🟢 PROMPT CHATGPT DALL-E 3:\n${sc.chatgptImagePrompt}\n\n`;
-      fullText += `⚡ PROMPT VEO3 / SORA VIDEO:\n${sc.veo3VideoPrompt || sc.veo3Prompt}\n\n`;
-      fullText += `🚫 Negative Prompt (Từ khóa cấm): ${sc.negativePrompt || 'photorealistic, 3d render, real human'}\n\n`;
+      fullText += `🖼️ Mô tả: ${sc.visualDescriptionVi}\n\n`;
+      fullText += `🔷 PROMPT GEMINI IMAGEN 3:\n${gPrompt}\n\n`;
+      fullText += `🟢 PROMPT CHATGPT DALL-E 3:\n${cPrompt}\n\n`;
+      fullText += `⚡ PROMPT VEO3 / SORA VIDEO:\n${vPrompt}\n\n`;
       fullText += `---------------------------------------------------\n\n`;
     });
 
@@ -47,7 +52,7 @@ export default function Veo3Studio({ veo3Data }) {
             <Sparkles size={26} /> Bộ Prompt Tạo Ảnh (Gemini, ChatGPT) & Video (Veo3)
           </h2>
           <p style={{ color: '#9ca3af', fontSize: '0.88rem', marginTop: 4 }}>
-            Đã khóa đúng phong cách nghệ thuật: <strong style={{ color: '#06b6d4' }}>{veo3Data.selectedArtStyleName || 'Vẽ tay phác thảo 2D nền đen'}</strong>
+            Đã khóa đúng phong cách nghệ thuật: <strong style={{ color: '#06b6d4' }}>Vẽ chì phác thảo 2D nền đen (Đúng đối thủ)</strong>
           </p>
         </div>
 
@@ -58,100 +63,96 @@ export default function Veo3Studio({ veo3Data }) {
         </div>
       </div>
 
-      {/* Guidance Alert Banner */}
-      <div style={{ background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.35)', padding: 16, borderRadius: 14, marginBottom: 24, color: '#fee2e2' }}>
+      {/* Alert Guidance */}
+      <div style={{ background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.4)', padding: 16, borderRadius: 14, marginBottom: 24 }}>
         <div style={{ fontWeight: 700, fontSize: '0.92rem', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 8, color: '#fca5a5' }}>
-          <AlertCircle size={18} /> ⚠️ LƯU Ý QUAN TRỌNG KHI TẠO ẢNH TRÊN GEMINI VÀ CHATGPT:
+          <AlertCircle size={18} /> ⚠️ LƯU Ý KHI TẠO ẢNH GEMINI & CHATGPT:
         </div>
         <div style={{ fontSize: '0.85rem', lineHeight: 1.5, color: '#e5e7eb' }}>
-          Để Gemini / ChatGPT <strong>KHÔNG VẼ NGUYÊN NGƯỜI THẬT HAY PHONG CẢNH 3D (như ảnh bạn vừa bị)</strong>, hãy sao chép toàn bộ đoạn <strong>"🔷 PROMPT GEMINI"</strong> bên dưới. Đoạn Prompt này đã bọc sẵn lệnh ép Gemini tạo ra đúng <strong>Nét vẽ phác thảo chì 2D trên nền đen (Hình 1)</strong>!
-        </div>
-      </div>
-
-      {/* Master Channel Banner */}
-      <div style={{ background: 'rgba(99, 102, 241, 0.1)', border: '1px solid rgba(99, 102, 241, 0.3)', padding: 16, borderRadius: 14, marginBottom: 24 }}>
-        <div style={{ fontWeight: 700, color: '#a5b4fc', fontSize: '0.95rem', marginBottom: 4 }}>
-          📺 Định Hướng Kênh: {veo3Data.channelName || 'Kênh Phác Thảo Cảm Xúc'}
-        </div>
-        <div style={{ fontSize: '0.85rem', color: '#d1d5db' }}>
-          {veo3Data.channelConcept}
+          Bấm nút <strong>"Copy Prompt Gemini"</strong> bên dưới dán vào Gemini. Đoạn Prompt đã được chèn lệnh ép buộc Gemini vẽ ra đúng <strong>Nét chì phác thảo 2D nền đen (Hình 1)</strong>, tuyệt đối không ra ảnh thật 3D!
         </div>
       </div>
 
       {/* Scenes List */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-        {veo3Data.scenes.map((sc, idx) => (
-          <div key={idx} style={{ background: 'rgba(8, 12, 23, 0.95)', border: '1px solid var(--border-color)', borderRadius: 14, padding: 20 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-              <span style={{ fontWeight: 700, color: '#06b6d4', fontSize: '0.98rem', display: 'flex', alignItems: 'center', gap: 8 }}>
-                <Video size={18} /> Cảnh {sc.sceneNumber} ({sc.timestamp})
-              </span>
-            </div>
+        {veo3Data.scenes.map((sc, idx) => {
+          // Resolve prompts with multi-key fallbacks
+          const geminiPrompt = sc.geminiImagePrompt || sc.geminiPrompt || `${defaultStylePrefix} ${sc.visualDescriptionVi || sc.voiceover} --ar 9:16`;
+          const chatgptPrompt = sc.chatgptImagePrompt || sc.chatgptPrompt || `${defaultStylePrefix} ${sc.visualDescriptionVi || sc.voiceover}, 9:16 vertical ratio`;
+          const veo3Prompt = sc.veo3VideoPrompt || sc.veo3Prompt || sc.videoPrompt || `${defaultStylePrefix} 2D animation`;
+          const negativePrompt = sc.negativePrompt || 'photorealistic, 3d render, real human, realistic photography, colorful background';
 
-            <div style={{ marginBottom: 10, fontSize: '0.88rem', color: '#e5e7eb' }}>
-              <strong>🗣️ Lời thoại Voiceover:</strong> "{sc.voiceover}"
-            </div>
-
-            <div style={{ marginBottom: 14, fontSize: '0.85rem', color: '#9ca3af' }}>
-              <strong>🖼️ Mô tả hình ảnh:</strong> {sc.visualDescriptionVi}
-            </div>
-
-            {/* 3 Prompts Grid */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {/* 1. Gemini Imagen 3 Prompt */}
-              <div style={{ background: 'rgba(99, 102, 241, 0.08)', border: '1px solid rgba(99, 102, 241, 0.3)', padding: 14, borderRadius: 10 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                  <span style={{ fontSize: '0.8rem', color: '#a5b4fc', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <Sparkles size={14} color="#6366f1" /> 🔷 PROMPT TẠO ẢNH GEMINI (ĐÃ KHÓA NÉT CHÌ 2D NỀN ĐEN):
-                  </span>
-                  <button className="btn-secondary" onClick={() => handleCopyPrompt(sc.geminiImagePrompt, `gemini_${idx}`)} style={{ padding: '3px 10px', fontSize: '0.75rem' }}>
-                    {copiedKey === `gemini_${idx}` ? <><Check size={12} color="#10b981" /> Đã Copy!</> : <><Copy size={12} /> Copy Prompt Gemini</>}
-                  </button>
-                </div>
-                <div style={{ fontFamily: 'monospace', fontSize: '0.85rem', color: '#c7d2fe', lineHeight: 1.5, wordBreak: 'break-word' }}>
-                  {sc.geminiImagePrompt}
-                </div>
+          return (
+            <div key={idx} style={{ background: 'rgba(8, 12, 23, 0.95)', border: '1px solid var(--border-color)', borderRadius: 14, padding: 20 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                <span style={{ fontWeight: 700, color: '#06b6d4', fontSize: '0.98rem', display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <Video size={18} /> Cảnh {sc.sceneNumber} ({sc.timestamp || '0:00'})
+                </span>
               </div>
 
-              {/* 2. ChatGPT DALL-E 3 Prompt */}
-              <div style={{ background: 'rgba(16, 185, 129, 0.08)', border: '1px solid rgba(16, 185, 129, 0.3)', padding: 14, borderRadius: 10 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                  <span style={{ fontSize: '0.8rem', color: '#6ee7b7', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <MessageSquare size={14} color="#10b981" /> 🟢 PROMPT TẠO ẢNH CHATGPT (DALL-E 3):
-                  </span>
-                  <button className="btn-secondary" onClick={() => handleCopyPrompt(sc.chatgptImagePrompt, `chatgpt_${idx}`)} style={{ padding: '3px 10px', fontSize: '0.75rem' }}>
-                    {copiedKey === `chatgpt_${idx}` ? <><Check size={12} color="#10b981" /> Đã Copy!</> : <><Copy size={12} /> Copy Prompt ChatGPT</>}
-                  </button>
-                </div>
-                <div style={{ fontFamily: 'monospace', fontSize: '0.85rem', color: '#a7f3d0', lineHeight: 1.5, wordBreak: 'break-word' }}>
-                  {sc.chatgptImagePrompt}
-                </div>
+              <div style={{ marginBottom: 10, fontSize: '0.88rem', color: '#e5e7eb' }}>
+                <strong>🗣️ Lời thoại Voiceover:</strong> "{sc.voiceover}"
               </div>
 
-              {/* 3. Veo3 / Sora Video Prompt */}
-              <div style={{ background: 'rgba(6, 182, 212, 0.08)', border: '1px solid rgba(6, 182, 212, 0.3)', padding: 14, borderRadius: 10 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                  <span style={{ fontSize: '0.8rem', color: '#06b6d4', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <Zap size={14} color="#06b6d4" /> ⚡ PROMPT TẠO VIDEO VEO3 / SORA (24FPS MOTION):
-                  </span>
-                  <button className="btn-secondary" onClick={() => handleCopyPrompt(sc.veo3VideoPrompt || sc.veo3Prompt, `veo3_${idx}`)} style={{ padding: '3px 10px', fontSize: '0.75rem' }}>
-                    {copiedKey === `veo3_${idx}` ? <><Check size={12} color="#10b981" /> Đã Copy!</> : <><Copy size={12} /> Copy Veo3 Prompt</>}
-                  </button>
-                </div>
-                <div style={{ fontFamily: 'monospace', fontSize: '0.85rem', color: '#67e8f9', lineHeight: 1.5, wordBreak: 'break-word' }}>
-                  {sc.veo3VideoPrompt || sc.veo3Prompt}
-                </div>
+              <div style={{ marginBottom: 14, fontSize: '0.85rem', color: '#9ca3af' }}>
+                <strong>🖼️ Mô tả hình ảnh:</strong> {sc.visualDescriptionVi}
               </div>
 
-              {/* Negative Prompt */}
-              {sc.negativePrompt && (
-                <div style={{ fontSize: '0.78rem', color: '#fca5a5', padding: '6px 10px', background: 'rgba(239, 68, 68, 0.1)', borderRadius: 6 }}>
-                  <strong>🚫 Từ khóa cấm (Negative Prompt):</strong> {sc.negativePrompt}
+              {/* 3 Prompts Grid */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                {/* 1. Gemini Imagen 3 Prompt */}
+                <div style={{ background: 'rgba(99, 102, 241, 0.12)', border: '1px solid rgba(99, 102, 241, 0.4)', padding: 14, borderRadius: 10 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                    <span style={{ fontSize: '0.82rem', color: '#a5b4fc', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <Sparkles size={16} color="#6366f1" /> 🔷 PROMPT TẠO ẢNH GEMINI (KHÓA NÉT CHÌ 2D NỀN ĐEN HÌNH 1):
+                    </span>
+                    <button className="btn-secondary" onClick={() => handleCopyPrompt(geminiPrompt, `gemini_${idx}`)} style={{ padding: '4px 12px', fontSize: '0.78rem', background: 'rgba(99, 102, 241, 0.3)' }}>
+                      {copiedKey === `gemini_${idx}` ? <><Check size={14} color="#10b981" /> Đã Copy!</> : <><Copy size={14} /> Copy Prompt Gemini</>}
+                    </button>
+                  </div>
+                  <div style={{ fontFamily: 'monospace', fontSize: '0.86rem', color: '#c7d2fe', lineHeight: 1.5, wordBreak: 'break-word', background: 'rgba(0,0,0,0.5)', padding: 10, borderRadius: 8 }}>
+                    {geminiPrompt}
+                  </div>
                 </div>
-              )}
+
+                {/* 2. ChatGPT DALL-E 3 Prompt */}
+                <div style={{ background: 'rgba(16, 185, 129, 0.12)', border: '1px solid rgba(16, 185, 129, 0.4)', padding: 14, borderRadius: 10 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                    <span style={{ fontSize: '0.82rem', color: '#6ee7b7', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <MessageSquare size={16} color="#10b981" /> 🟢 PROMPT TẠO ẢNH CHATGPT (DALL-E 3 NÉT CHÌ 2D):
+                    </span>
+                    <button className="btn-secondary" onClick={() => handleCopyPrompt(chatgptPrompt, `chatgpt_${idx}`)} style={{ padding: '4px 12px', fontSize: '0.78rem', background: 'rgba(16, 185, 129, 0.3)' }}>
+                      {copiedKey === `chatgpt_${idx}` ? <><Check size={14} color="#10b981" /> Đã Copy!</> : <><Copy size={14} /> Copy Prompt ChatGPT</>}
+                    </button>
+                  </div>
+                  <div style={{ fontFamily: 'monospace', fontSize: '0.86rem', color: '#a7f3d0', lineHeight: 1.5, wordBreak: 'break-word', background: 'rgba(0,0,0,0.5)', padding: 10, borderRadius: 8 }}>
+                    {chatgptPrompt}
+                  </div>
+                </div>
+
+                {/* 3. Veo3 / Sora Video Prompt */}
+                <div style={{ background: 'rgba(6, 182, 212, 0.12)', border: '1px solid rgba(6, 182, 212, 0.4)', padding: 14, borderRadius: 10 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                    <span style={{ fontSize: '0.82rem', color: '#06b6d4', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <Zap size={16} color="#06b6d4" /> ⚡ PROMPT TẠO VIDEO VEO3 / SORA (MOTION 24FPS):
+                    </span>
+                    <button className="btn-secondary" onClick={() => handleCopyPrompt(veo3Prompt, `veo3_${idx}`)} style={{ padding: '4px 12px', fontSize: '0.78rem', background: 'rgba(6, 182, 212, 0.3)' }}>
+                      {copiedKey === `veo3_${idx}` ? <><Check size={14} color="#10b981" /> Đã Copy!</> : <><Copy size={14} /> Copy Veo3 Prompt</>}
+                    </button>
+                  </div>
+                  <div style={{ fontFamily: 'monospace', fontSize: '0.86rem', color: '#67e8f9', lineHeight: 1.5, wordBreak: 'break-word', background: 'rgba(0,0,0,0.5)', padding: 10, borderRadius: 8 }}>
+                    {veo3Prompt}
+                  </div>
+                </div>
+
+                {/* Negative Prompt */}
+                <div style={{ fontSize: '0.78rem', color: '#fca5a5', padding: '8px 12px', background: 'rgba(239, 68, 68, 0.1)', borderRadius: 8, border: '1px solid rgba(239, 68, 68, 0.2)' }}>
+                  <strong>🚫 Từ khóa cấm (Negative Prompt):</strong> {negativePrompt}
+                </div>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
