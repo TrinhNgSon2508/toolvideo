@@ -2,7 +2,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import Groq from 'groq-sdk';
 
 /**
- * Generates Veo3/Sora Video Prompts AND Gemini/ChatGPT DALL-E Image Prompts
+ * Generates image & video prompts strictly locked onto Competitor Visual DNA
  */
 export async function generateVeo3ChannelPrompts({
   analysisData,
@@ -10,28 +10,30 @@ export async function generateVeo3ChannelPrompts({
   apiKey,
   provider = 'gemini'
 }) {
-  const prompt = `
-Bạn là Chuyên gia Prompt Engineering số 1 thế giới dành cho các AI Generator hàng đầu như Google Gemini Imagen 3, ChatGPT DALL-E 3, Midjourney, Google Veo 3, và OpenAI Sora.
+  const visualDNA = analysisData.visualDNA || {};
+  const masterPrompt = analysisData.visualStyleAnalysis?.masterStylePrompt || '';
 
-DƯỚI ĐÂY LÀ PHÂN TÍCH PHONG CÁCH KÊNH (MASTER STYLE):
-- Thể loại Visual: ${analysisData.videoAnalysis?.visualFormat || 'Cinematic AI Motion'}
-- Phong cách chuyển động Camera: ${analysisData.videoAnalysis?.motionType || 'Cinematic Motion'}
-- Tông màu & Ánh sáng: ${analysisData.visualStyleAnalysis?.colorGrading || 'Dark Moody'}
-- Master Visual Style Prompt: ${analysisData.visualStyleAnalysis?.masterStylePrompt || '8k cinematic, hyperrealistic'}
+  const prompt = `
+Bạn là Chuyên gia Prompt Engineering số 1 thế giới dành cho các AI Image & Video Generators như Google Gemini (Imagen 3), ChatGPT (DALL-E 3), Midjourney, Google Veo 3 và OpenAI Sora.
+
+DƯỚI ĐÂY LÀ "VISUAL DNA" ĐÃ BÓC TÁCH TỪ VIDEO ĐỐI THỦ:
+- Nhân vật / Chủ thể chính đối thủ: ${visualDNA.characterSubjectDetails || 'Nhân vật AI đặc trưng'}
+- Bối cảnh & Không gian: ${visualDNA.environmentAndSetting || 'Bối cảnh hiện đại'}
+- Tông màu & Ánh sáng: ${visualDNA.colorPaletteAndLighting || 'Cinematic Lighting'}
+- Kiểu xếp khung hình: ${visualDNA.cameraFramingStyle || '9:16 Vertical shot'}
+- Master Visual DNA Prompt: ${masterPrompt || '8k photorealistic cinematic'}
 
 DƯỚI ĐÂY LÀ KỊCH BẢN MỚI CẦN TẠO PROMPT HÌNH ẢNH & VIDEO:
 \`\`\`
 ${newScriptText}
 \`\`\`
 
-NHIỆM VỤ CỦA BẠN:
-Hãy chia kịch bản thành từng CẢNH HÌNH ẢNH (Scenes) ngắn 3s - 5s - 10s. 
-Với MỖI CẢNH, hãy tạo ra 3 BỘ PROMPT TIẾNG ANH CHUYÊN NGHIỆP:
-1. **Gemini / Imagen 3 Prompt**: Tối ưu chuẩn tạo ảnh siêu nét 8K, độ phân giải cực cao trên Google Gemini.
-2. **ChatGPT / DALL-E 3 Prompt**: Tối ưu chuẩn tạo ảnh nghệ thuật giàu chi tiết trên ChatGPT (DALL-E 3).
-3. **Veo3 / Sora Video Prompt**: Tối ưu tạo video chuyển động điện ảnh 24fps (Cinematic motion, camera movement).
+YÊU CẦU BẮT BUỘC KHẮC KHEN:
+Mọi Prompt Tạo Ảnh (cho Gemini và ChatGPT) của TỪNG CẢNH PHẢI BÁM SÁT 100% VÀO "VISUAL DNA" CỦA ĐỐI THỦ BÊN TRÊN! 
+Cụ thể: Phải kế thừa đúng nhân vật/vật thể, kiểu trang phục, bối cảnh không gian và tông màu ánh sáng của đối thủ để các ảnh sinh ra GIỐNG HỆT NHƯ CÙNG MỘT VIDEO CỦA ĐỐI THỦ nhưng được nâng cấp đẹp sắc nét hơn.
 
-Trả về kết quả chuẩn định dạng JSON theo cấu trúc sau (không chứa bất kỳ văn bản thừa nào ngoài JSON):
+Trả về kết quả chuẩn định dạng JSON theo cấu trúc sau (không chứa văn bản thừa):
+
 {
   "channelName": "Tên kênh gợi ý",
   "channelConcept": "Tóm tắt chủ đề kênh",
@@ -41,11 +43,11 @@ Trả về kết quả chuẩn định dạng JSON theo cấu trúc sau (không 
       "sceneNumber": 1,
       "timestamp": "0:00 - 0:03",
       "voiceover": "Lời thoại phân đoạn",
-      "visualDescriptionVi": "Mô tả hình ảnh bằng Tiếng Việt",
-      "geminiImagePrompt": "Full English Prompt cho Google Gemini Imagen 3: Highly detailed 8k photorealistic image of [subject], [environment & lighting], cinematic style, ratio 9:16, --no text watermark",
-      "chatgptImagePrompt": "Full English Prompt cho ChatGPT DALL-E 3: Create a cinematic 9:16 vertical image showing [subject] in [setting], dramatic lighting, hyper-realistic 8k resolution, vivid details, no text overlay",
-      "veo3VideoPrompt": "Full English Prompt cho Veo3/Sora Video: [Subject], [action and movement], [cinematic camera movement e.g. slow pan, tracking shot], [environment & lighting], 8k render, 24fps",
-      "negativePrompt": "blurry, low quality, deformed, text watermark, ugly"
+      "visualDescriptionVi": "Mô tả hình ảnh bằng Tiếng Việt bám sát đối thủ",
+      "geminiImagePrompt": "Full English Prompt cho Google Gemini Imagen 3: Vertical 9:16 aspect ratio, highly detailed 8k photorealistic image of [EXACT COMPETITOR CHARACTER IN SPECIFIC OUTFIT AND ACTION], set in [EXACT COMPETITOR ENVIRONMENT], [EXACT COLOR PALETTE AND LIGHTING], shot on 35mm lens, cinematic depth of field, hyper-realistic, no text overlay --ar 9:16",
+      "chatgptImagePrompt": "Full English Prompt cho ChatGPT DALL-E 3: Create a cinematic vertical 9:16 ratio image of [EXACT COMPETITOR CHARACTER], [ACTION], located in [EXACT COMPETITOR SETTING], featuring [EXACT LIGHTING AND COLOR TONE], ultra-detailed 8k resolution, photorealistic style, dramatic framing, no text overlay",
+      "veo3VideoPrompt": "Full English Prompt cho Veo3/Sora Video: Vertical 9:16 cinematic video, [EXACT COMPETITOR CHARACTER AND ENVIRONMENT], [specific motion & action], [camera shot e.g. slow zoom in, smooth panning], 8k render, 24fps",
+      "negativePrompt": "blurry, low quality, wrong character, inconsistent style, text watermark, 4:3, distorted"
     }
   ]
 }

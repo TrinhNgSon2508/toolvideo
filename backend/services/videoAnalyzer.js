@@ -2,7 +2,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import Groq from 'groq-sdk';
 
 /**
- * Advanced Competitor Video Analyzer: Video Motion, Visual Style, Voiceover Tone, & Outperform Strategy
+ * Advanced Competitor Video Analyzer with Visual DNA Extraction
  */
 export async function analyzeCompetitorVideo({
   transcript,
@@ -10,7 +10,7 @@ export async function analyzeCompetitorVideo({
   provider = 'groq'
 }) {
   const prompt = `
-Bạn là một Đạo diễn Điện ảnh & Chuyên gia Phân tích Content Video Ngắn (TikTok/Reels/Shorts/YouTube) số 1 thị trường.
+Bạn là một Đạo diễn Điện ảnh & Chuyên gia Phân tích Visual Content Video Ngắn (TikTok/Reels/Shorts/YouTube) số 1 thị trường.
 
 Dưới đây là NỘI DUNG VÀ LỜI THOẠI TRÍCH XUẤT TỪ VIDEO ĐỐI THỦ:
 \`\`\`
@@ -18,38 +18,44 @@ ${transcript}
 \`\`\`
 
 NHIỆM VỤ CỦA BẠN:
-Hãy phân tích mổ xẻ toàn diện video đối thủ trên 3 TRỤ CỘT CHÍNH: (1) VIDEO/CHUYỂN ĐỘNG, (2) HÌNH ẢNH/PHONG CÁCH NGHỆ THUẬT, (3) GIỌNG ĐỌC/ÂM THANH. Từ đó đưa ra BẢN ĐÚC KẾT ĐỂ BẠN LÀM VIDEO HOÀN CHỈNH & VƯỢT TRỘI HƠN ĐỐI THỦ (Outperform Strategy).
+Hãy bóc tách "DNA HÌNH ẢNH & VISUAL ANCHORS" chi tiết nhất của đối thủ để các ảnh/video AI tạo ra sau này BÁM SÁT 100% GIỐNG HỆT PHONG CÁCH VÀ BỐI CẢNH CỦA ĐỐI THỦ.
 
-Hãy trả về kết quả định dạng JSON chuẩn xác theo cấu trúc sau (không chứa bất kỳ văn bản thừa nào ngoài JSON):
+Trả về kết quả định dạng JSON chuẩn xác theo cấu trúc sau (không kèm văn bản thừa):
 
 {
   "videoAnalysis": {
     "visualFormat": "Ảnh tĩnh ghép hiệu ứng / Video AI chuyển động 3D / AI Avatar nói chuyện / B-Roll điện ảnh",
     "motionType": "Góc quay tĩnh / Zoom dồn dập / Camera Tracking / Pan ngang / Cinematic Slow motion",
     "pacing": "Rất nhanh (1-2s đổi cảnh) / Trung bình (3-5s) / Chậm lắng đọng",
-    "retentionTechnique": "Kỹ thuật giữ chân người xem của đối thủ (Pattern Interrupt, Hook 3s, Visual Loops...)"
+    "retentionTechnique": "Kỹ thuật giữ chân người xem của đối thủ"
+  },
+  "visualDNA": {
+    "characterSubjectDetails": "Mô tả siêu chi tiết nhân vật/vật thể chính đối thủ (Tuổi tác, giới tính, kiểu tóc, trang phục đặc trưng, biểu cảm)",
+    "environmentAndSetting": "Bối cảnh chi tiết đối thủ hay dùng (Phòng làm việc hiện đại, đường phố ban đêm, studio ánh sáng neon, phong cảnh núi rừng...)",
+    "colorPaletteAndLighting": "Tông màu & Ánh sáng đặc trưng (Ánh sáng tím Cyberpunk, Tông tối Dark Moody, Nắng vàng Warm Golden, Ánh sáng Studio chuyên nghiệp)",
+    "cameraFramingStyle": "Cách xếp khung hình đặc trưng (Cận cảnh khuôn mặt, Góc nhìn thứ nhất 1st person, Góc rộng cinematic 9:16)"
   },
   "visualStyleAnalysis": {
-    "colorGrading": "Tông màu tối bí ẩn (Dark Moody) / Rực rỡ hiện đại (Vibrant Modern) / Cổ điển Cinematic / Tối giản",
-    "subjectAndEnvironment": "Mô tả phong cách nhân vật, bối cảnh và chất liệu chi tiết",
-    "masterStylePrompt": "Đoạn Prompt Tiếng Anh (Master Visual Style Prompt) độ phân giải 8k, photorealistic, cinematic lighting, nhất quán 100% cho toàn bộ series video của kênh"
+    "colorGrading": "Tông màu chủ đạo",
+    "subjectAndEnvironment": "Tóm tắt bối cảnh",
+    "masterStylePrompt": "Một đoạn Prompt Tiếng Anh chuẩn (Master Visual DNA Prompt) mô tả nhân vật, bối cảnh, ánh sáng, góc quay 9:16, 8k resolution, photorealistic để tạo ảnh bám sát 100% giống video đối thủ"
   },
   "voiceAnalysis": {
-    "recommendedGenderAndDialect": "Giọng Nam/Nữ, vùng miền (Giọng Bắc trầm ấm / Giọng Nam sôi nổi / Giọng Nữ lôi cuốn)",
-    "toneAndEmotion": "Cảm xúc đọc: Drama bí ẩn / Hào hứng truyền cảm hứng / Chuyên gia uy tín / Hài hước Gen-Z",
-    "speakingSpeed": "Nhanh dồn dập / Vừa phải dễ nghe / Nhấn từng từ lắng đọng",
-    "bgmAndSfxRecommendation": "Gợi ý thể loại Nhạc nền (BGM: Synthwave/Lo-Fi/Epic Cinematic) & Hiệu ứng âm thanh (SFX: Riser, Swoosh, Pop)"
+    "recommendedGenderAndDialect": "Giọng Nam/Nữ, vùng miền",
+    "toneAndEmotion": "Cảm xúc đọc",
+    "speakingSpeed": "Tốc độ đọc",
+    "bgmAndSfxRecommendation": "Gợi ý BGM & SFX"
   },
   "outperformStrategy": {
-    "competitorWeakness": "Điểm yếu lớn nhất trong video của đối thủ (Ví dụ: Lời thoại lan man, thiếu hình ảnh minh họa đắt giá, kết bài chưa ấn tượng)",
+    "competitorWeakness": "Điểm yếu lớn nhất của đối thủ",
     "fiveImprovementKeys": [
-      "Bí quyết 1: Tối ưu lại 3 giây đầu tiên (Hook) cực mạnh chạm nỗi đau người xem",
-      "Bí quyết 2: Đẩy nhanh nhịp chuyển cảnh gấp 1.5 lần",
-      "Bí quyết 3: Nâng cấp hình ảnh chất lượng 8k Cinematic sinh động hơn",
-      "Bí quyết 4: Dùng giọng đọc AI cảm xúc chuẩn tông hơn",
-      "Bí quyết 5: Thêm Call-To-Action (CTA) chốt đơn/follow thuyết phục"
+      "Bí quyết 1",
+      "Bí quyết 2",
+      "Bí quyết 3",
+      "Bí quyết 4",
+      "Bí quyết 5"
     ],
-    "actionPlanSummary": "Đút rút hành động cụ thể để bạn làm kịch bản & dựng video vượt trội hơn đối thủ ngay hôm nay"
+    "actionPlanSummary": "Đút rút hành động"
   }
 }
 `;
